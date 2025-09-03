@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electric Blue Token Manager</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            font-family: 'VT323', monospace; /* Set pixel font globally */
+        }
+
+        :root {
+            --primary-blue: #00d4ff;
+            --secondary-blue: #0099cc;
+            --electric-cyan: #00ffff;
+            --dark-bg: #0a0a0f;
+            --text-primary: #ffffff;
+            --text-secondary: #b3d9ff;
+            --success-color: #00ff88;
+            --warning-color: #ffaa00;
+            --danger-color: #ff3366;
+        }
+
+        body {
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        #pixelCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .logo h1 {
+            font-size: 3.5rem; /* Larger for pixel font */
+            font-weight: 400; /* Pixel fonts often don't have weights */
+            color: var(--primary-blue);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .card, .login-container {
+            background: #101928;
+            border: 2px solid var(--primary-blue);
+            border-radius: 0;
+            padding: 40px;
+            position: relative;
+        }
+
+        .card h2 {
+            text-align: center;
+            margin-bottom: 35px;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            color: var(--primary-blue);
+            font-weight: 400;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--primary-blue);
+            font-weight: 400;
+            font-size: 1.2rem; /* Larger for pixel font */
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 18px 20px;
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            border-radius: 0;
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-primary);
+            font-size: 1.2rem; /* Larger for pixel font */
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: rgba(179, 217, 255, 0.6);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px 30px;
+            border: 2px solid var(--primary-blue);
+            border-radius: 0;
+            background: var(--secondary-blue);
+            color: white;
+            font-size: 1.3rem; /* Larger for pixel font */
+            font-weight: 400;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .btn:hover {
+            background: var(--primary-blue);
+            color: var(--dark-bg);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #555;
+            border-color: #555;
+        }
+
+        .btn.danger {
+            background: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+        
+        .btn.danger:hover {
+             background: #ff4d79;
+        }
+
+        .status {
+            text-align: center;
+            margin: 25px 0;
+            padding: 20px;
+            border-radius: 0;
+            font-weight: 400;
+            border: 2px solid;
+            font-size: 1.2rem;
+        }
+
+        .status.success {
+            background: rgba(0, 255, 136, 0.15);
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .status.error {
+            background: rgba(255, 51, 102, 0.15);
+            border-color: var(--danger-color);
+            color: var(--danger-color);
+        }
+
+        .status.warning {
+            background: rgba(255, 170, 0, 0.15);
+            border-color: var(--warning-color);
+            color: var(--warning-color);
+        }
+
+        .user-info {
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 0;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .user-info h3 {
+            color: var(--primary-blue);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            font-weight: 400;
+        }
+
+        .limit-info {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        .control-panel {
+            border: 2px solid #ffd700;
+            border-radius: 0;
+            padding: 30px;
+        }
+
+        .control-panel h3 {
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.6rem;
+            font-weight: 400;
+        }
+
+        .control-panel.pt { border-color: #8a2be2; }
+        .control-panel.pt h3 { color: #8a2be2; }
+        .control-panel.ceo { border-color: #ff1493; }
+        .control-panel.ceo h3 { color: #ff1493; }
+        .control-panel.developer { border-color: #ff0000; }
+        .control-panel.developer h3 { color: #ff0000; }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-radius: 0;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            text-align: center;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+
+        .tab:hover {
+            color: #fff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .tab.active {
+            background: var(--primary-blue);
+            color: #000;
+            font-weight: 400;
+        }
+
+        .tokens-container {
+            max-height: 450px;
+            overflow-y: auto;
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            border-radius: 0;
+            background: rgba(0, 0, 0, 0.2);
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-blue) transparent;
+        }
+
+        .tokens-container::-webkit-scrollbar { width: 8px; }
+        .tokens-container::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
+        .tokens-container::-webkit-scrollbar-thumb { background: var(--primary-blue); border-radius: 0; }
+
+        .token-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 25px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .token-item:hover {
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .token-item:last-child {
+            border-bottom: none;
+        }
+
+        .token-text {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            letter-spacing: 0.5px;
+            flex: 1;
+            margin-right: 20px;
+            word-break: break-all;
+        }
+
+        .token-number {
+            background: var(--primary-blue);
+            color: #000;
+            padding: 8px 12px;
+            border-radius: 0;
+            font-size: 1rem;
+            font-weight: 400;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .delete-btn, .logout-btn, .refresh-btn {
+            background: rgba(255, 51, 102, 0.2);
+            color: var(--danger-color);
+            border: 2px solid rgba(255, 51, 102, 0.4);
+            padding: 8px 16px;
+            border-radius: 0;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        .delete-btn:hover, .logout-btn:hover {
+            background: rgba(255, 51, 102, 0.3);
+        }
+
+        .refresh-btn {
+            background: rgba(0, 212, 255, 0.2);
+            color: var(--primary-blue);
+            border-color: rgba(0, 212, 255, 0.4);
+            margin-left: 15px;
+            font-size: 1.1rem;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(0, 212, 255, 0.3);
+        }
+
+        .kill-control {
+            border: 2px solid rgba(255, 0, 0, 0.4);
+            border-radius: 0;
+            padding: 30px;
+            margin-bottom: 35px;
+            text-align: center;
+        }
+
+        .kill-control h3 {
+            color: #ff0000;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            font-weight: 400;
+        }
+
+        .kill-status {
+            font-size: 1.6rem;
+            margin: 25px 0;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .kill-status.active { color: #ff0000; }
+        .kill-status.inactive { color: var(--success-color); }
+
+        .login-header h2 {
+            color: var(--primary-blue);
+            font-size: 2rem;
+            margin-bottom: 15px;
+            font-weight: 400;
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            font-weight: 400;
+        }
+
+        .password-group {
+            position: relative;
+        }
+
+        .show-password {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--primary-blue);
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .show-password:hover {
+            color: var(--electric-cyan);
+            background: rgba(0, 212, 255, 0.1);
+        }
+        
+        .blocked-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            text-align: center;
+        }
+
+        .blocked-content {
+            max-width: 700px;
+            padding: 50px;
+            border: 2px solid #ff0000;
+        }
+
+        .blocked-content h1 {
+            color: #ff0000;
+            font-size: 3.5rem;
+            margin-bottom: 25px;
+            font-weight: 400;
+        }
+
+        .blocked-content p {
+            color: #ffffff;
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            font-weight: 400;
+        }
+
+        .security-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            color: var(--danger-color);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            font-size: 2.5rem;
+            font-weight: 400;
+            text-align: center;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: var(--text-secondary);
+            font-style: italic;
+            font-size: 1.1rem;
+        }
+
+        .no-tokens {
+            text-align: center;
+            padding: 50px;
+            color: var(--text-secondary);
+            font-style: italic;
+            font-size: 1.1rem;
+        }
+
+        .tokens-count {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--primary-blue);
+            font-weight: 400;
+            font-size: 1.1rem;
+        }
+
+        .daily-usage {
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .daily-usage h4 {
+            color: var(--primary-blue);
+            margin-bottom: 15px;
+            font-weight: 400;
+        }
+
+        .usage-bar {
+            background: rgba(0, 0, 0, 0.4);
+            height: 12px;
+            border-radius: 0;
+            margin: 15px 0;
+            overflow: hidden;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .usage-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success-color), var(--warning-color), var(--danger-color));
+            border-radius: 0;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .hidden { display: none !important; }
+
+        .dashboard-columns {
+            display: flex;
+            gap: 35px;
+        }
+
+        .dashboard-left, .dashboard-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 35px;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-columns {
+                flex-direction: column;
+            }
+            .container { 
+                padding: 20px 15px; 
+                max-width: 100%;
+            }
+            .card, .login-container { padding: 30px 25px; }
+            .logo h1 { font-size: 2.2rem; }
+            .form-row { flex-direction: column; gap: 0; }
+            .limit-info { flex-direction: column; gap: 8px; text-align: left; }
+            .tabs { flex-wrap: wrap; }
+            .tab { min-width: 140px; padding: 12px 15px; font-size: 0.9rem; }
+            .blocked-content { padding: 30px; margin: 20px; }
+            .blocked-content h1 { font-size: 2.5rem; }
+            .security-overlay { font-size: 2rem; padding: 20px; }
+            .orb { display: none; }
+        }
+
+        @media (max-width: 480px) {
+            .logo h1 { font-size: 1.8rem; letter-spacing: 1px; }
+            .login-container, .card { padding: 25px 20px; margin: 10px; }
+            .btn { padding: 16px 25px; font-size: 1rem; }
+            .token-item { padding: 15px 20px; flex-direction: column; align-items: flex-start; gap: 10px; }
+            .token-text { margin-right: 0; word-break: break-all; }
+        }
+
+        *:focus-visible {
+            outline: 2px solid var(--primary-blue);
+            outline-offset: 2px;
+        }
+
+        @media (prefers-contrast: high) {
+            .card, .login-container { border-width: 3px; }
+            .btn { border: 2px solid var(--primary-blue); }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="pixelCanvas"></canvas>
+    <div class="security-overlay" id="securityOverlay">
+        ⚠️ SECURITY BREACH DETECTED ⚠️<br>
+        UNAUTHORIZED ACCESS ATTEMPT
+    </div>
+
+    <!-- Blocked Screen -->
+    <div class="blocked-screen" id="blockedScreen">
+        <div class="blocked-content">
+            <h1>🚫 SYSTEM BLOCKED</h1>
+            <p>This application has been temporarily disabled by the administrator.</p>
+            <p>Please contact support for more information.</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="logo">
+            <h1>⚡ ELECTRIC BLUE</h1>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm" class="login-container">
+            <div class="login-header">
+                <h2>🔐 SECURE ACCESS</h2>
+                <p>Enter your credentials to access the token management system</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            </div>
+            
+            <div class="form-group password-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                <button type="button" class="show-password" onclick="togglePassword()">👁️</button>
+            </div>
+            
+            <button type="button" class="btn" onclick="handleLogin()">LOGIN</button>
+            
+            <div style="text-align: center; margin-top: 35px; padding-top: 25px; border-top: 1px solid rgba(0, 191, 255, 0.2);">
+                <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                    Need access? Contact <strong style="color: var(--primary-blue);">@electricoffc</strong>
+                </p>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="hidden">
+            <div class="dashboard-columns">
+                <div class="dashboard-left">
+                    <!-- Kill Switch Control (Developer Only) -->
+                    <div id="killControl" class="kill-control hidden">
+                        <h3>Script Control Panel</h3>
+                        <div class="kill-status" id="killStatus">Loading...</div>
+                        <button type="button" class="btn danger" onclick="toggleKillSwitch()">Nonaktifkan Script</button>
+                    </div>
+
+                    <!-- Control Panel (PT, CEO, Developer) -->
+                    <div id="controlPanel" class="control-panel hidden">
+                        <h3 id="panelTitle">CONTROL PANEL</h3>
+                        
+                        <div class="daily-usage">
+                            <h4>Daily User Creation Progress</h4>
+                            <div class="usage-bar">
+                                <div class="usage-fill" id="usageBar"></div>
+                            </div>
+                            <span id="usageText">0 / 0 users created today</span>
+                        </div>
+
+                        <div class="tabs" id="controlTabs">
+                            <button class="tab active" onclick="switchTab('createUser')">Create User</button>
+                            <button class="tab" onclick="switchTab('manageUsers')">Manage Users</button>
+                        </div>
+                        
+                        <div id="createUserTab" class="tab-content active">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="newUsername">Username</label>
+                                    <input type="text" id="newUsername" placeholder="Enter new username" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="newPassword">Password</label>
+                                    <input type="password" id="newPassword" placeholder="Enter password" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="userType">User Type</label>
+                                <select id="userType">
+                                    <!-- Options will be populated based on user permissions -->
+                                </select>
+                            </div>
+                            <button type="button" class="btn" onclick="createNewUser()">CREATE USER</button>
+                        </div>
+                        
+                        <div id="manageUsersTab" class="tab-content">
+                            <div class="tokens-container" id="usersList">
+                                <div class="loading">Loading users...</div>
+                            </div>
+                            <button type="button" class="btn" onclick="loadUsers()">REFRESH USERS</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h2>ADD TOKEN</h2>
+                        <div class="form-group">
+                            <label for="token">Bot Token</label>
+                            <textarea id="token" name="token" placeholder="Enter your bot token here..." rows="4" required></textarea>
+                        </div>
+                        <button type="button" class="btn" id="addTokenBtn" onclick="addToken()">ADD TOKEN</button>
+                    </div>
+                </div>
+                <div class="dashboard-right">
+                    <div class="user-info">
+                        <h3 id="welcomeMessage">Welcome, User!</h3>
+                        <div class="limit-info">
+                            <span>Daily Token Limit: <span id="dailyTokenLimit">-</span></span>
+                            <span>Tokens Today: <span id="tokensToday">0</span></span>
+                        </div>
+                        <div class="limit-info">
+                            <span>Daily User Limit: <span id="dailyUserLimit">-</span></span>
+                            <span>Users Created Today: <span id="usersCreatedToday">0</span></span>
+                        </div>
+                        <button class="logout-btn" onclick="logout()">Logout</button>
+                    </div>
+
+                    <!-- Token List -->
+                    <div class="card">
+                        <h2>
+                            📋 TOKEN LIST
+                            <button id="refreshTokens" class="refresh-btn" onclick="loadTokensFromGitHub()">🔄</button>
+                        </h2>
+                        <div id="tokensList" class="tokens-container">
+                            <div class="loading">Loading tokens...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="status" class="status hidden"></div>
+    </div>
+
+    <script>
+        // Security configuration
+        const SECURITY_CONFIG = {
+            blockDevTools: true,
+            blockRightClick: true,
+            blockKeyShortcuts: true,
+            blockSelection: true
+        };
+
+        const CONFIG = {
+            token: atob('Z2hwXzlDQUFMaDAzMjdPSlV1NnFNNm84Qk1rc2UxT2hWQTFsUWlkWg=='),
+            repo: {
+                owner: 'studens911-design',
+                name: 'anonim',
+                tokensFile: 'tokens.json',
+                usersFile: 'users.json',
+                killFile: 'erorin.json'
+            }
+        };
+
+        const DEFAULT_USERS = {
+            'developer': {
+                password: 'electric11',
+                type: 'developer',
+                dailyTokenLimit: Infinity,
+                dailyUserLimit: Infinity,
+                name: 'Developer',
+                canCreate: ['reseler', 'pt', 'ceo'],
+                canDelete: true,
+                canKill: true,
+                dailyUsage: {},
+                created: new Date().toISOString(),
+                createdBy: 'system'
+            }
+        };
+        
+        const USER_CONFIGS = {
+            'reseler': { 
+                dailyTokenLimit: 2, 
+                dailyUserLimit: 0, 
+                name: 'Reseler',
+                canCreate: [],
+                canDelete: false
+            },
+            'pt': { 
+                dailyTokenLimit: 7, 
+                dailyUserLimit: 3, 
+                name: 'PT',
+                canCreate: ['reseler'],
+                canDelete: true
+            },
+            'ceo': { 
+                dailyTokenLimit: 10, 
+                dailyUserLimit: 4, 
+                name: 'CEO',
+                canCreate: ['reseler', 'pt'],
+                canDelete: true
+            },
+            'developer': { 
+                dailyTokenLimit: Infinity, 
+                dailyUserLimit: Infinity, 
+                name: 'Developer',
+                canCreate: ['reseler', 'pt', 'ceo'],
+                canDelete: true,
+                canKill: true
+            }
+        };
+
+        let currentUser = null;
+        let allTokens = [];
+        let allUsers = {};
+        let killStatus = false;
+
+        // Get today's date string for daily limits
+        function getTodayString() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleBtn = document.querySelector('.show-password');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.textContent = '👁️';
+            }
+        }
+
+        // Initialize daily usage tracking for user
+function initDailyUsage(username) {
+    const today = getTodayString();
+    if (!allUsers[username]) {
+        // If user doesn't exist in allUsers, create it from DEFAULT_USERS
+        if (DEFAULT_USERS[username]) {
+            allUsers[username] = { ...DEFAULT_USERS[username] };
+        }
+    }
+    
+    if (!allUsers[username].dailyUsage) {
+        allUsers[username].dailyUsage = {};
+    }
+    if (!allUsers[username].dailyUsage[today]) {
+        allUsers[username].dailyUsage[today] = {
+            tokensAdded: 0,
+            usersCreated: 0
+        };
+    }
+}
+
+        // Get daily usage for user
+        function getDailyUsage(username, type = 'tokensAdded') {
+            if (!allUsers[username] || !allUsers[username].dailyUsage) return 0;
+            const today = getTodayString();
+            return allUsers[username].dailyUsage[today] ? allUsers[username].dailyUsage[today][type] : 0;
+        }
+
+        // Update daily usage
+async function updateDailyUsage(username, type = 'tokensAdded', increment = 1) {
+    if (allUsers[username]) {
+        initDailyUsage(username);
+        const today = getTodayString();
+        allUsers[username].dailyUsage[today][type] += increment;
+        
+        // CRITICAL: Always save to GitHub immediately after updating usage
+        try {
+            await saveUsersToGitHub();
+            console.log(`Daily usage updated for ${username}: ${type} +${increment}`);
+        } catch (error) {
+            console.error('Failed to save daily usage:', error);
+            // Revert the change if save failed
+            allUsers[username].dailyUsage[today][type] -= increment;
+            throw error;
+        }
+    }
+}
+
+        // Check kill switch status
+        async function checkKillStatus() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${CONFIG.repo.owner}/${CONFIG.repo.name}/contents/${CONFIG.repo.killFile}`, {
+                    headers: {
+                        'Authorization': `token ${CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (response.ok) {
+                    const fileData = await response.json();
+                    const content = atob(fileData.content);
+                    const data = JSON.parse(content);
+                    killStatus = data.kill || false;
+                } else if (response.status === 404) {
+                    killStatus = false;
+                } else {
+                    throw new Error('Failed to fetch kill status');
+                }
+
+                // Update UI if developer is logged in
+                if (currentUser && currentUser.type === 'developer') {
+                    updateKillStatusDisplay();
+                }
+
+            } catch (error) {
+                console.error('Error checking kill status:', error);
+            }
+        }
+
+        // Update kill status display
+        function updateKillStatusDisplay() {
+            const statusEl = document.getElementById('killStatus');
+            const toggleBtn = document.querySelector('.kill-control .btn');
+            
+            if (killStatus) {
+                statusEl.textContent = 'Script Status: NONAKTIF';
+                statusEl.className = 'kill-status active';
+                toggleBtn.textContent = 'Aktifkan Script';
+            } else {
+                statusEl.textContent = 'Script Status: AKTIF';
+                statusEl.className = 'kill-status inactive';
+                toggleBtn.textContent = 'Nonaktifkan Script';
+            }
+        }
+
+        // Toggle kill switch (Developer only)
+        async function toggleKillSwitch() {
+            if (!currentUser || currentUser.type !== 'developer') {
+                showStatus('Access denied!', 'error');
+                return;
+            }
+
+            const newStatus = !killStatus;
+            const confirmMessage = newStatus ? 
+                'Apakah Anda yakin ingin mengubah status menjadi NONAKTIF?' :
+                'Apakah Anda yakin ingin mengubah status menjadi AKTIF?';
+
+            if (!confirm(confirmMessage)) return;
+
+            try {
+                // Get current file content
+                const getResponse = await fetch(`https://api.github.com/repos/${CONFIG.repo.owner}/${CONFIG.repo.name}/contents/${CONFIG.repo.killFile}`, {
+                    headers: {
+                        'Authorization': `token ${CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                let sha = null;
+                if (getResponse.ok) {
+                    const fileData = await getResponse.json();
+                    sha = fileData.sha;
+                }
+
+                const content = btoa(JSON.stringify({ kill: newStatus }, null, 2));
+                const updateData = {
+                    message: `Update script status to: ${newStatus ? 'false' : 'true'}`,
+                    content: content,
+                    sha: sha
+                };
+
+                const updateResponse = await fetch(`https://api.github.com/repos/${CONFIG.repo.owner}/${CONFIG.repo.name}/contents/${CONFIG.repo.killFile}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                if (!updateResponse.ok) {
+                    throw new Error('Failed to update file');
+                }
+
+                killStatus = newStatus;
+                updateKillStatusDisplay();
+                showStatus(`File berhasil diupdate! Status: ${newStatus ? 'NONAKTIF' : 'AKTIF'}`, 'success');
+
+            } catch (error) {
+                showStatus(`Error updating file: ${error.message}`, 'error');
+            }
+        }
+
+        // Security functions
+        function initSecurity() {
+            // Block right click
+            if (SECURITY_CONFIG.blockRightClick) {
+                document.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    showSecurityAlert();
+                });
+            }
+
+            // Block F12, Ctrl+Shift+I, Ctrl+U, etc.
+            if (SECURITY_CONFIG.blockKeyShortcuts) {
+                document.addEventListener('keydown', (e) => {
+                    // F12
+                    if (e.keyCode === 123) {
+                        e.preventDefault();
+                        showSecurityAlert();
+                        return false;
+                    }
+                    // Ctrl+Shift+I (Developer Tools)
+                    if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+                        e.preventDefault();
+                        showSecurityAlert();
+                        return false;
+                    }
+                    // Ctrl+U (View Source)
+                    if (e.ctrlKey && e.keyCode === 85) {
+                        e.preventDefault();
+                        showSecurityAlert();
+                        return false;
+                    }
+                    // Ctrl+Shift+C (Select Element)
+                    if (e.ctrlKey && e.shiftKey && e.keyCode === 67) {
+                        e.preventDefault();
+                        showSecurityAlert();
+                        return false;
+                    }
+                    // Ctrl+Shift+K (Console)
+                    if (e.ctrlKey && e.shiftKey && e.keyCode === 75) {
+                        e.preventDefault();
+                        showSecurityAlert();
+                        return false;
+                    }
+                });
+            }
+
+            // Detect DevTools
+            if (SECURITY_CONFIG.blockDevTools) {
+                let devtools = { open: false, orientation: null };
+                
+                setInterval(() => {
+                    if (window.outerHeight - window.innerHeight > 200 || window.outerWidth - window.innerWidth > 200) {
+                        if (!devtools.open) {
+                            devtools.open = true;
+                            showSecurityAlert();
+                        }
+                    } else {
+                        devtools.open = false;
+                    }
+                }, 500);
+            }
+
+            // Disable drag and drop
+            document.addEventListener('dragstart', (e) => e.preventDefault());
+            document.addEventListener('drop', (e) => e.preventDefault());
+        }
+
+        function showSecurityAlert() {
+            document.getElementById('securityOverlay').style.display = 'flex';
+            setTimeout(() => {
+                document.getElementById('securityOverlay').style.display = 'none';
+            }, 3000);
+        }
+
+        // Load users from GitHub
+        async function loadUsersFromGitHub() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${CONFIG.repo.owner}/${CONFIG.repo.name}/contents/${CONFIG.repo.usersFile}`, {
+                    headers: {
+                        'Authorization': `token ${CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (response.ok) {
+                    const fileData = await response.json();
+                    const content = atob(fileData.content);
+                    const data = JSON.parse(content);
+                    allUsers = data.users || {};
+                } else if (response.status === 404) {
+                    allUsers = {};
+                } else {
+                    throw new Error('Failed to fetch users');
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        // Save users to GitHub
+        async function saveUsersToGitHub() {
+            try {
+                // Get current file content
+                const getResponse = await fetch(`https://api.github.com/repos/${CONFIG.repo.owner}/${CONFIG.repo.name}/contents/${CONFIG.repo.usersFile}`, {
+                    headers: {
+                        'Authorization': `token ${CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                let sha = null;
+                if (getResponse.ok) {
+                    const fileData = await getResponse.json();
+                    sha = fileData.sha;
+                }
+
+                const content = btoa(JSON.stringify({ users: allUsers }, null, 2));
+                const updateData = {
+                    message: 'Update users data',
+                    content: content,
+                    sha: sha
+                };
+
+                const updateResponse = await fetch(`https://api.github.com/repos/${CONFIG.repo.owner}/${CONFIG.repo.name}/contents/${CONFIG.repo.usersFile}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                if (!updateResponse.ok) {
+                    throw new Error('Failed to save users');
+                }
+            } catch (error) {
+                throw new Error(`Error saving users: ${error.message}`);
+            }
+        }
+
+        // Update user type select options based on permissions
+        function updateUserTypeOptions() {
+            const select = document.getElementById('userType');
+            select.innerHTML = '';
+
+            if (currentUser.canCreate.includes('reseler')) {
+                select.innerHTML += `<option value="reseler">Reseler (2 tokens/day)</option>`;
+            }
+            if (currentUser.canCreate.includes('pt')) {
+                select.innerHTML += `<option value="pt">PT (7 tokens/day, 3 users/day)</option>`;
+            }
+            if (currentUser.canCreate.includes('ceo')) {
+                select.innerHTML += `<option value="ceo">CEO (10 tokens/day, 4 users/day)</option>`;
+            }
+        }
+
+        // Create new user with permission checks
+        async function createNewUser() {
+            const username = document.getElementById('newUsername').value.trim();
+            const password = document.getElementById('newPassword').value.trim();
+            const userType = document.getElementById('userType').value;
+
+            if (!username || !password) {
+                showStatus('Please enter both username and password!', 'error');
+                return;
+            }
+
+            // Check if user already exists
+            if (allUsers[username]) {
+                showStatus('User already exists!', 'error');
+                return;
+            }
+
+            // Check permissions
+            if (!currentUser.canCreate.includes(userType)) {
+                showStatus('You do not have permission to create this user type!', 'error');
+                return;
+            }
+
+            // Check daily limit
+            const dailyUsed = getDailyUsage(currentUser.username, 'usersCreated');
+            if (currentUser.dailyUserLimit !== Infinity && dailyUsed >= currentUser.dailyUserLimit) {
+                showStatus(`Daily user creation limit reached! (${dailyUsed}/${currentUser.dailyUserLimit})`, 'warning');
+                return;
+            }
+
+            const config = USER_CONFIGS[userType];
+            allUsers[username] = {
+                password: password,
+                type: userType,
+                dailyTokenLimit: config.dailyTokenLimit,
+                dailyUserLimit: config.dailyUserLimit,
+                name: config.name,
+                canCreate: config.canCreate,
+                canDelete: config.canDelete,
+                dailyUsage: {},
+                created: new Date().toISOString(),
+                createdBy: currentUser.username
+            };
+
+            try {
+                await saveUsersToGitHub();
+                
+                // Update creator's daily usage
+                await updateDailyUsage(currentUser.username, 'usersCreated');
+                
+                document.getElementById('newUsername').value = '';
+                document.getElementById('newPassword').value = '';
+                showStatus(`User "${username}" created successfully!`, 'success');
+                updateUsageDisplay();
+                loadUsers();
+            } catch (error) {
+                showStatus(`Error creating user: ${error.message}`, 'error');
+            }
+        }
+
+        // Load and display users
+        function loadUsers() {
+            const container = document.getElementById('usersList');
+            
+            if (Object.keys(allUsers).length === 0) {
+                container.innerHTML = '<div class="no-tokens">No custom users found.</div>';
+                return;
+            }
+
+            let html = `<div class="tokens-count">Total Custom Users: ${Object.keys(allUsers).length}</div>`;
+            
+            // Filter users based on permissions
+            let visibleUsers = {};
+            
+            if (currentUser.type === 'developer') {
+                visibleUsers = allUsers;
+            } else {
+                Object.entries(allUsers).forEach(([username, userData]) => {
+                    // Show users created by current user or users of lower hierarchy
+                    if (userData.createdBy === currentUser.username || 
+                        (currentUser.type === 'ceo' && (userData.type === 'reseler' || userData.type === 'pt')) ||
+                        (currentUser.type === 'pt' && userData.type === 'reseler')) {
+                        visibleUsers[username] = userData;
+                    }
+                });
+            }
+            
+            Object.entries(visibleUsers).forEach(([username, userData]) => {
+                const dailyTokens = getDailyUsage(username, 'tokensAdded');
+                const dailyUsers = getDailyUsage(username, 'usersCreated');
+                
+                html += `
+                    <div class="token-item">
+                        <div class="token-number">${userData.name}</div>
+                        <div class="token-text">
+                            <strong>${username}</strong><br>
+                            <small>Daily Tokens: ${dailyTokens}/${userData.dailyTokenLimit === Infinity ? '∞' : userData.dailyTokenLimit}</small><br>
+                            <small>Users created today: ${dailyUsers}/${userData.dailyUserLimit === Infinity ? '∞' : userData.dailyUserLimit}</small><br>
+                            <small style="color: var(--primary-blue);">Created by: ${userData.createdBy || 'System'}</small>
+                        </div>
+                        ${(currentUser.canDelete && (currentUser.type === 'developer' || userData.createdBy === currentUser.username)) ? 
+                            `<button class="delete-btn" onclick="deleteUser('${username}')">Delete</button>` : 
+                            ''
+                        }
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Delete user with permission checks
+        async function deleteUser(username) {
+            if (!currentUser.canDelete) {
+                showStatus('Access denied!', 'error');
+                return;
+            }
+
+            // Check if user can delete this user
+            if (currentUser.type !== 'developer' && allUsers[username].createdBy !== currentUser.username) {
+                showStatus('You can only delete users you created!', 'error');
+                return;
+            }
+
+            if (confirm(`Are you sure you want to delete user "${username}"?`)) {
+                delete allUsers[username];
+                try {
+                    await saveUsersToGitHub();
+                    showStatus(`User "${username}" deleted successfully!`, 'success');
+                    loadUsers();
+                } catch (error) {
+                    showStatus(`Error deleting user: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // Switch tabs in control panel
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+            
+            if (tabName === 'manageUsers') {
+                loadUsers();
+            }
+        }
+
+        // Sensor token function
+        function sensorToken(token) {
+            if (token.length < 10) return token;
+            
+            // Show first 8 characters, then ******, then last 4 characters
+            const start = token.substring(0, 8);
+            const end = token.substring(token.length - 4);
+            const middle = '*'.repeat(Math.min(20, token.length - 12));
+            
+            return `${start}${middle}${end}`;
+        }
+
+        // Load tokens from GitHub
+        async function loadTokensFromGitHub() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${CONFIG.repo.owner}/${CONFIG.repo.name}/contents/${CONFIG.repo.tokensFile}`, {
+                    headers: {
+                        'Authorization': `token ${CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (response.ok) {
+                    const fileData = await response.json();
+                    const content = atob(fileData.content);
+                    const data = JSON.parse(content);
+                    allTokens = data.tokens || [];
+                    displayTokens();
+                } else if (response.status === 404) {
+                    allTokens = [];
+                    displayTokens();
+                } else {
+                    throw new Error('Failed to fetch tokens');
+                }
+            } catch (error) {
+                console.error('Error loading tokens:', error);
+                document.getElementById('tokensList').innerHTML = 
+                    '<div class="loading" style="color: var(--danger-color);">Error loading tokens. Please try again.</div>';
+            }
+        }
+
+        // Display tokens in the UI
+        function displayTokens() {
+            const container = document.getElementById('tokensList');
+            
+            if (allTokens.length === 0) {
+                container.innerHTML = '<div class="no-tokens">No tokens found in repository.</div>';
+                return;
+            }
+
+            let html = `<div class="tokens-count">Total Tokens: ${allTokens.length}</div>`;
+            
+            allTokens.forEach((token, index) => {
+                html += `
+                    <div class="token-item">
+                        <div class="token-number">${index + 1}</div>
+                        <div class="token-text">${sensorToken(token)}</div>
+                        ${currentUser && currentUser.type === 'developer' ? 
+                            `<button class="delete-btn" onclick="deleteToken(${index})">Delete</button>` : 
+                            ''
+                        }
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Delete token (Developer only)
+        async function deleteToken(index) {
+            if (!currentUser || currentUser.type !== 'developer') {
+                showStatus('Access denied! Only developers can delete tokens.', 'error');
+                return;
+            }
+
+            if (confirm(`Are you sure you want to delete token #${index + 1}?`)) {
+                try {
+                    // Remove token from array
+                    allTokens.splice(index, 1);
+                    
+                    // Update GitHub
+                    await updateTokensOnGitHub();
+                    
+                    // Refresh display
+                    displayTokens();
+                    showStatus('Token deleted successfully!', 'success');
+                } catch (error) {
+                    showStatus(`Error deleting token: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        // Update tokens on GitHub
+        async function updateTokensOnGitHub() {
+            try {
+                // Get current file content
+                const getResponse = await fetch(`https://api.github.com/repos/${CONFIG.repo.owner}/${CONFIG.repo.name}/contents/${CONFIG.repo.tokensFile}`, {
+                    headers: {
+                        'Authorization': `token ${CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                let sha = null;
+                if (getResponse.ok) {
+                    const fileData = await getResponse.json();
+                    sha = fileData.sha;
+                }
+
+                const updatedContent = btoa(JSON.stringify({ tokens: allTokens }, null, 2));
+                const updateData = {
+                    message: `Update tokens via Electric Blue Manager`,
+                    content: updatedContent,
+                    sha: sha
+                };
+
+                const updateResponse = await fetch(`https://api.github.com/repos/${CONFIG.repo.owner}/${CONFIG.repo.name}/contents/${CONFIG.repo.tokensFile}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                if (!updateResponse.ok) {
+                    const errorData = await updateResponse.json();
+                    throw new Error(errorData.message || 'Failed to update repository');
+                }
+
+                return await updateResponse.json();
+            } catch (error) {
+                throw new Error(`GitHub API Error: ${error.message}`);
+            }
+        }
+
+        // Initialize enhanced particles
+        function createParticles() {
+            const particlesContainer = document.querySelector('.electric-particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (6 + Math.random() * 6) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Show status message with enhanced styling
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            statusEl.classList.remove('hidden');
+            
+            setTimeout(() => {
+                statusEl.classList.add('hidden');
+            }, 6000);
+        }
+
+        // Handle login with enhanced UX
+        async function handleLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (!username || !password) {
+                showStatus('Please enter both username and password!', 'error');
+                return;
+            }
+
+            // Load users data first
+            await loadUsersFromGitHub();
+            
+            // Check default users first
+            if (DEFAULT_USERS[username]) {
+                if (DEFAULT_USERS[username].password === password) {
+                    currentUser = {
+                        username: username,
+                        ...DEFAULT_USERS[username]
+                    };
+                    // Initialize in GitHub if not exists
+                    if (!allUsers[username]) {
+                        allUsers[username] = DEFAULT_USERS[username];
+                        await saveUsersToGitHub();
+                    }
+                    initDailyUsage(username);
+                } else {
+                    showStatus('Invalid password!', 'error');
+                    return;
+                }
+            }
+            // Check custom users
+            else if (allUsers[username]) {
+                if (allUsers[username].password !== password) {
+                    showStatus('Invalid password!', 'error');
+                    return;
+                }
+                
+                const userData = allUsers[username];
+                currentUser = {
+                    username: username,
+                    type: userData.type,
+                    dailyTokenLimit: userData.dailyTokenLimit,
+                    dailyUserLimit: userData.dailyUserLimit,
+                    name: userData.name,
+                    canCreate: userData.canCreate || [],
+                    canDelete: userData.canDelete || false,
+                    canKill: userData.canKill || false
+                };
+                
+                initDailyUsage(username);
+            } else {
+                showStatus('Invalid username! Please contact @electricoffc to buy access.', 'error');
+                return;
+            }
+
+            // Update UI with animations
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('welcomeMessage').textContent = `Welcome, ${currentUser.name}!`;
+            
+            // Show kill control for developer
+            if (currentUser.type === 'developer') {
+                document.getElementById('killControl').classList.remove('hidden');
+                updateKillStatusDisplay();
+            }
+            
+            // Show control panel for non-reseler users
+            if (currentUser.type !== 'reseler') {
+                const controlPanel = document.getElementById('controlPanel');
+                const panelTitle = document.getElementById('panelTitle');
+                
+                controlPanel.classList.remove('hidden');
+                controlPanel.classList.remove('pt', 'ceo', 'developer');
+                
+                if (currentUser.type === 'developer') {
+                    panelTitle.textContent = '💻 DEVELOPER CONTROL PANEL';
+                    controlPanel.classList.add('developer');
+                    document.querySelectorAll('.tab').forEach(tab => {
+                        tab.classList.add('developer');
+                    });
+                } else if (currentUser.type === 'ceo') {
+                    panelTitle.textContent = '💼 CEO CONTROL PANEL';
+                    controlPanel.classList.add('ceo');
+                    document.querySelectorAll('.tab').forEach(tab => {
+                        tab.classList.add('ceo');
+                    });
+                } else if (currentUser.type === 'pt') {
+                    panelTitle.textContent = '⚡ PT CONTROL PANEL';
+                    controlPanel.classList.add('pt');
+                    document.querySelectorAll('.tab').forEach(tab => {
+                        tab.classList.add('pt');
+                    });
+                }
+                
+                updateUserTypeOptions();
+            }
+            
+            updateUsageDisplay();
+            loadTokensFromGitHub();
+            showStatus(`Successfully logged in as ${currentUser.name}!`, 'success');
+        }
+
+        // Update usage display with enhanced visuals
+        function updateUsageDisplay() {
+            const dailyTokens = getDailyUsage(currentUser.username, 'tokensAdded');
+            const dailyUsersCreated = getDailyUsage(currentUser.username, 'usersCreated');
+            
+            document.getElementById('dailyTokenLimit').textContent = currentUser.dailyTokenLimit === Infinity ? 'Unlimited' : currentUser.dailyTokenLimit;
+            document.getElementById('tokensToday').textContent = dailyTokens;
+            document.getElementById('dailyUserLimit').textContent = currentUser.dailyUserLimit === Infinity ? 'Unlimited' : currentUser.dailyUserLimit;
+            document.getElementById('usersCreatedToday').textContent = dailyUsersCreated;
+            
+            // Update usage bar if control panel is visible
+            if (currentUser.type !== 'reseler') {
+                const usageBar = document.getElementById('usageBar');
+                const usageText = document.getElementById('usageText');
+                
+                if (currentUser.dailyUserLimit === Infinity) {
+                    usageBar.style.width = '0%';
+                    usageText.textContent = `${dailyUsersCreated} users created today (Unlimited)`;
+                } else {
+                    const percentage = (dailyUsersCreated / currentUser.dailyUserLimit) * 100;
+                    usageBar.style.width = `${Math.min(percentage, 100)}%`;
+                    usageText.textContent = `${dailyUsersCreated} / ${currentUser.dailyUserLimit} users created today`;
+                }
+            }
+            
+            // Update button state with enhanced styling
+            const addTokenBtn = document.getElementById('addTokenBtn');
+            if (currentUser.dailyTokenLimit !== Infinity && dailyTokens >= currentUser.dailyTokenLimit) {
+                addTokenBtn.disabled = true;
+                addTokenBtn.textContent = 'DAILY TOKEN LIMIT REACHED';
+            } else {
+                addTokenBtn.disabled = false;
+                addTokenBtn.textContent = 'ADD TOKEN';
+            }
+        }
+
+        // Add token with enhanced UX
+        async function addToken() {
+            if (!currentUser) {
+                showStatus('Please login first!', 'error');
+                return;
+            }
+
+            const dailyTokens = getDailyUsage(currentUser.username, 'tokensAdded');
+            
+            // Check daily limit
+            if (currentUser.dailyTokenLimit !== Infinity && dailyTokens >= currentUser.dailyTokenLimit) {
+                showStatus(`Daily token limit reached! You can add ${currentUser.dailyTokenLimit} tokens per day.`, 'warning');
+                return;
+            }
+
+            const token = document.getElementById('token').value.trim();
+            if (!token) {
+                showStatus('Please enter a valid token!', 'error');
+                return;
+            }
+
+            const addTokenBtn = document.getElementById('addTokenBtn');
+            addTokenBtn.disabled = true;
+            addTokenBtn.textContent = 'ADDING...';
+
+            try {
+                await addTokenToGitHub(token);
+                
+                // Update user's daily token usage
+                await updateDailyUsage(currentUser.username, 'tokensAdded');
+                
+                updateUsageDisplay();
+                await loadTokensFromGitHub();
+                
+                document.getElementById('token').value = '';
+                showStatus('Token successfully added to repository!', 'success');
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+                console.error('Error adding token:', error);
+            }
+
+            addTokenBtn.disabled = false;
+            addTokenBtn.textContent = 'ADD TOKEN';
+        }
+
+        // Add token to GitHub
+        async function addTokenToGitHub(newToken) {
+            try {
+                // Get current file content
+                const getResponse = await fetch(`https://api.github.com/repos/${CONFIG.repo.owner}/${CONFIG.repo.name}/contents/${CONFIG.repo.tokensFile}`, {
+                    headers: {
+                        'Authorization': `token ${CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                let currentData = { tokens: [] };
+                let sha = null;
+
+                if (getResponse.ok) {
+                    const fileData = await getResponse.json();
+                    sha = fileData.sha;
+                    const content = atob(fileData.content);
+                    currentData = JSON.parse(content);
+                }
+
+                // Add new token to the end (bottom) of the array
+                if (!currentData.tokens.includes(newToken)) {
+                    currentData.tokens.push(newToken);
+                    allTokens = currentData.tokens;
+                } else {
+                    throw new Error('Token already exists in the repository!');
+                }
+
+                // Update file
+                const updatedContent = btoa(JSON.stringify(currentData, null, 2));
+                const updateData = {
+                    message: `Add new token via Electric Blue Manager`,
+                    content: updatedContent,
+                    sha: sha
+                };
+
+                const updateResponse = await fetch(`https://api.github.com/repos/${CONFIG.repo.owner}/${CONFIG.repo.name}/contents/${CONFIG.repo.tokensFile}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                if (!updateResponse.ok) {
+                    const errorData = await updateResponse.json();
+                    throw new Error(errorData.message || 'Failed to update repository');
+                }
+
+                return await updateResponse.json();
+            } catch (error) {
+                throw new Error(`GitHub API Error: ${error.message}`);
+            }
+        }
+
+        // Logout function with enhanced UX
+        function logout() {
+            currentUser = null;
+            allUsers = {};
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('controlPanel').classList.add('hidden');
+            document.getElementById('killControl').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            showStatus('Successfully logged out!', 'success');
+        }
+
+        // Initialize application with enhanced setup
+        async function init() {
+            initSecurity();
+            createParticles();
+            
+            // Disable some browser features
+            document.addEventListener('selectstart', (e) => e.preventDefault());
+            document.addEventListener('dragstart', (e) => e.preventDefault());
+            
+            // Check kill switch status first
+            await checkKillStatus();
+            
+            // Load initial data
+            await loadUsersFromGitHub();
+            
+            // Check kill switch periodically (every 30 seconds)
+            setInterval(checkKillStatus, 30000);
+        }
+
+        // Handle Enter key press in login form
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('username').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('password').focus();
+                }
+            });
+            
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    handleLogin();
+                }
+            });
+        });
+
+        // Start the application
+        init();
+    </script>
+    <script>
+        const pixelCanvas = document.getElementById('pixelCanvas');
+        const pixelCtx = pixelCanvas.getContext('2d');
+
+        pixelCanvas.width = window.innerWidth;
+        pixelCanvas.height = window.innerHeight;
+
+        const pixelSize = 4;
+        const columns = Math.ceil(pixelCanvas.width / pixelSize);
+        const rainDrops = [];
+
+        for (let x = 0; x < columns; x++) {
+            rainDrops[x] = -Math.random() * pixelCanvas.height;
+        }
+
+        const drawPixels = () => {
+            pixelCtx.fillStyle = 'rgba(10, 10, 15, 0.1)';
+            pixelCtx.fillRect(0, 0, pixelCanvas.width, pixelCanvas.height);
+
+            pixelCtx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary-blue');
+            
+            for (let i = 0; i < rainDrops.length; i++) {
+                pixelCtx.fillRect(i * pixelSize, rainDrops[i], pixelSize, pixelSize);
+
+                if (rainDrops[i] > pixelCanvas.height && Math.random() > 0.975) {
+                    rainDrops[i] = -pixelSize;
+                }
+                rainDrops[i] += pixelSize;
+            }
+        };
+
+        setInterval(drawPixels, 50);
+
+        window.addEventListener('resize', () => {
+            pixelCanvas.width = window.innerWidth;
+            pixelCanvas.height = window.innerHeight;
+            const newColumns = Math.ceil(pixelCanvas.width / pixelSize);
+            rainDrops.length = newColumns;
+            for (let x = 0; x < newColumns; x++) {
+                if (rainDrops[x] === undefined) {
+                    rainDrops[x] = -Math.random() * pixelCanvas.height;
+                }
+            }
+        });
+    </script>
+</body>
+</html
