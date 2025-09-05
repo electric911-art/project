@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Electric Blue Token Manager</title>
+    <meta name="google-adsense-account" content="ca-pub-4333608494064849">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4333608494064849"
+     crossorigin="anonymous"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
         
@@ -572,6 +575,37 @@
             .card, .login-container { border-width: 3px; }
             .btn { border: 2px solid var(--primary-blue); }
         }
+
+        #adContainer {
+            background: #101928;
+            border: 2px solid var(--primary-blue);
+            padding: 0;
+            max-height: 50px; /* Force container height */
+            text-align: center;
+            display: none; /* Hidden by default, JS will show it */
+            margin-top: 35px; /* Add space from content above */
+            overflow: hidden; /* Hide anything that overflows the max-height */
+        }
+
+        #adPlaceholder {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        #adPlaceholder a {
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        #adPlaceholder a:hover {
+            text-decoration: underline;
+        }
+
+        @media (orientation: landscape) and (max-height: 500px) {
+            #adContainer {
+                max-height: 32px !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -716,6 +750,21 @@
         </div>
 
         <div id="status" class="status hidden"></div>
+
+        <!-- Ad Container -->
+        <div id="adContainer">
+            <!-- Ad Unit Code -->
+            <!-- electric -->
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-4333608494064849"
+                 data-ad-slot="5676832382"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
     </div>
 
     <script>
@@ -756,14 +805,14 @@
         
         const USER_CONFIGS = {
             'reseler': { 
-                dailyTokenLimit: 2, 
+                dailyTokenLimit: 3, 
                 dailyUserLimit: 0, 
                 name: 'Reseler',
                 canCreate: [],
                 canDelete: false
             },
             'pt': { 
-                dailyTokenLimit: 7, 
+                dailyTokenLimit: 8, 
                 dailyUserLimit: 3, 
                 name: 'PT',
                 canCreate: ['reseler'],
@@ -771,7 +820,7 @@
             },
             'ceo': { 
                 dailyTokenLimit: 10, 
-                dailyUserLimit: 4, 
+                dailyUserLimit: 5, 
                 name: 'CEO',
                 canCreate: ['reseler', 'pt'],
                 canDelete: true
@@ -1698,8 +1747,31 @@ async function updateDailyUsage(username, type = 'tokensAdded', increment = 1) {
             showStatus('Successfully logged out!', 'success');
         }
 
+        // --- Ad Logic ---
+        function handleConnectionChange() {
+            const adContainer = document.getElementById('adContainer');
+            const isOnline = navigator.onLine;
+
+            if (isOnline) {
+                console.log('Online: Showing ad container.');
+                adContainer.style.display = 'block';
+                // For AdSense, the library automatically handles ad loading when the container is visible.
+                // If ads don't appear, you might need this line for specific ad units:
+                // (adsbygoogle = window.adsbygoogle || []).push({});
+            } else {
+                console.log('Offline: Hiding ad container.');
+                adContainer.style.display = 'none';
+            }
+        }
+
         // Initialize application with enhanced setup
         async function init() {
+            // --- Ad Logic Initialization ---
+            handleConnectionChange(); // Check status on page load
+            window.addEventListener('online', handleConnectionChange);
+            window.addEventListener('offline', handleConnectionChange);
+            // --- End Ad Logic Initialization ---
+
             initSecurity();
             createParticles();
             
